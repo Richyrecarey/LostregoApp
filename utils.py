@@ -27,7 +27,8 @@ def load_data():
     df['IndexByField'] = df.sort_values(['Pista','Hora'], ascending=[True, True]).groupby(['Pista']).cumcount() + 1   
                 
     df["ID"] = "P" + df["Pista"].astype(str) + "G" + df["Grupo"].astype(str) + "-" + df.index.astype(str)
-    df = df.set_index("ID")
+    # df = df.set_index("ID")
+    df = df.set_index("Hora")
     
     df["Resultado"] = np.where(df["Resultado"].isnull(), "Pendiente", df["Resultado"])
     df["Resultado"] = df["Resultado"].transform(result_beautifier)
@@ -110,4 +111,6 @@ def get_group_classification(raw_data, team):
     ret = ret.sort_values(by = ["P. Ganados", "Dif. Puntos"], ascending=[False,False])
     ret = ret.reset_index(drop=True)
     ret.index += 1
+    # ret.index = ret.index.astype("str") + "o"
+    ret.index.name = 'Pos.'
     return ret
