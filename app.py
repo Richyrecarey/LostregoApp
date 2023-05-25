@@ -21,7 +21,7 @@ Para cualquier duda, pásate por la carpa.
 ---
 """
 
-cols_to_show = ["Hora", "Pista", "Grupo", "Equipo 1", "Equipo 2", "Resultado", "Árbitro"]
+cols_to_show = ["Pista", "Grupo", "Equipo 1", "Equipo 2", "Resultado", "Árbitro"]
 
 
 
@@ -70,7 +70,7 @@ else:
     st.dataframe(df_horario_grupos[cols_to_show].style.applymap(color, subset=['Equipo 1', 'Equipo 2', 'Árbitro']).applymap(bold, subset=['Equipo 1', 'Equipo 2']))
     
     st.caption(f'Clasificación Grupo N - Pasarán a categoría oro los N primeros, y a plata los demás.')
-    st.dataframe(get_group_classification(df_horario_grupos, equipo).style.applymap(color, subset=['Equipo']))
+    st.dataframe(get_group_classification(df_horario_grupos, equipo).style.applymap(color, subset=['Equipo']).format({'Dif. Puntos':'{:+d}'}))
 
     st.caption(f'Partidos de eliminatorias para :orange[{equipo}] (incluye partidos a arbitrar):')
     st.markdown(f':dimgray[Partidos de eliminatorias para :orange[{equipo}] (incluye partidos a arbitrar)]')
@@ -86,7 +86,8 @@ else:
     if df_horario_elim.empty:
         st.info(f'Aún no están disponibles los partidos de clasificatoria para :orange[{equipo}]', icon="ℹ️")
     else:
-        cols_to_show2 = ["Hora", "Pista", "Fase","Equipo 1", "Equipo 2", "Resultado", "Árbitro"]
+        # cols_to_show2 = ["Hora", "Pista", "Fase","Equipo 1", "Equipo 2", "Resultado", "Árbitro"]
+        cols_to_show2 = ["Pista", "Fase","Equipo 1", "Equipo 2", "Resultado", "Árbitro"]
         st.dataframe(df_horario_elim[cols_to_show2].style.applymap(color, subset=['Equipo 1', 'Equipo 2']).applymap(bold, subset=['Equipo 1', 'Equipo 2']))
 
 
