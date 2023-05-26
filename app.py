@@ -4,7 +4,6 @@ import streamlit as st
 from utils import *
 import copy
 
-
 def color(val):
     color = 'orange' if val==equipo else 'white'
     return f'color: {color}'
