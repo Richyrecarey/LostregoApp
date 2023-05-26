@@ -5,7 +5,7 @@ from utils import *
 import numpy as np
 import copy
 
-@st.cache_data(ttl=15)
+@st.cache_data(ttl=15, show_spinner=False)
 def load_data():
     csv_url = "https://docs.google.com/spreadsheets/d/1JOj1lYQkPVXzWKu0FqmVu6xj4SoZxKa7YqQ2YWO9fXE/export?format=csv&gid=0"
     df = pd.read_csv(csv_url)
@@ -28,7 +28,9 @@ def load_data():
                 
     df["ID"] = "P" + df["Pista"].astype(str) + "G" + df["Grupo"].astype(str) + "-" + df.index.astype(str)
     # df = df.set_index("ID")
-    df = df.set_index("Hora")
+    # df = df.set_index("Hora")
+    # df = df.set_index(["Hora", "Pista"], drop=False)
+    # df.index.names = ['Hora', 'Pista']
     
     df["Resultado"] = np.where(df["Resultado"].isnull(), "Pendiente", df["Resultado"])
     df["Resultado"] = df["Resultado"].transform(result_beautifier)
@@ -51,20 +53,46 @@ def bold(val):
     return "font-weight: bold"
 
 
+def color_clasi(val):
+    tamaño_grupo = len(val)
+    # print(f"Dentro de color_clasi")
+    # print(np.where(np.isin(val, [1,2]), "color: gold;", "color: silver;"))
+    # Por ahora hardcodeado
+    return np.where(np.isin(val, [1,2]), "color: gold;", "color: silver;")
+
+
 def result_beautifier(result):
     aux = result.split("-")
     aux = [s.strip() for s in aux]
     return " - ".join(aux)
 
+def obtener_grupo(horario, equipo):
+    grupo = horario.loc[(horario["Equipo 1"] == equipo) | (horario["Equipo 2"] == equipo), "Grupo"].values[0]
+    return int(grupo)
 
-
-def get_group_classification(raw_data, team):
-    query = f'(`Equipo 1`=="{team}" | `Equipo 2`=="{team}") & Fase == "Grupos"'
-    aux = raw_data.query(query)
-    # print(aux)
+def obtener_competición(horario, equipo):
+    competicion = horario.loc[(horario["Equipo 1"] == equipo) | (horario["Equipo 2"] == equipo), "Competición"].values[0]
+    return competicion
     
-    team_group = aux["Grupo"].values[0]
-    # print(team_group)
+
+
+def color(val, equipo_seleccionado):
+    # print(f"Dentro de color con {equipo_seleccionado}")
+    color = 'orange' if val==equipo_seleccionado else 'white'
+    return f'color: {color}'
+
+def formateo_columnas(cols):
+    return ["background-color: dimgray; color:slategray"]*len(cols)
+
+
+def get_group_classi(raw_data, team, competicion):
+    # Esta esta mal
+    # query = f'(`Equipo 1`=="{team}" | `Equipo 2`=="{team}") & Fase == "Grupos"'
+    grupo_equipo = obtener_grupo(raw_data, team)
+    query = f'(Grupo =={grupo_equipo}) & (Fase == "Grupos") & (Competición == "{competicion}")'
+    print(query)
+    aux = raw_data.query(query)
+    print(aux)
     
     group_teams = pd.unique(aux[['Equipo 1', 'Equipo 2']].values.ravel('K')).tolist()
     # print(group_teams)
@@ -76,9 +104,12 @@ def get_group_classification(raw_data, team):
         "Dif. Puntos": 0,
     }
     
-    group_info = {team: copy.deepcopy(default_dict) for team in group_teams}
-    # print(group_info)
-    # print(group_info.values())
+    group_info = {}
+    for team in group_teams:
+        _temp = copy.deepcopy(default_dict)
+        _temp["Equipo"] = team
+        group_info[team] = _temp
+    
     
     # Iteramos por el dataframe
     for index, row in aux.iterrows():
@@ -88,7 +119,7 @@ def get_group_classification(raw_data, team):
         if row["Resultado"] != "Pendiente":
             equipo_ganador = which_team_won(row["Resultado"])
             diferencia_puntos = int(row["Resultado"].split(" - ")[0]) - int(row["Resultado"].split(" - ")[1])
-            print(diferencia_puntos)
+            # print(diferencia_puntos)
             
             # Equipo 1
             group_info[row["Equipo 1"]]["Equipo"] = row["Equipo 1"]
@@ -108,9 +139,22 @@ def get_group_classification(raw_data, team):
         
     # print(group_info.values())
     ret = pd.DataFrame.from_dict(group_info.values())
+    print(group_info)
     ret = ret.sort_values(by = ["P. Ganados", "Dif. Puntos"], ascending=[False,False])
     ret = ret.reset_index(drop=True)
     ret.index += 1
     # ret.index = ret.index.astype("str") + "o"
     ret.index.name = 'Pos.'
+    
+    # .style.applymap(color, subset=['Equipo']).format({'Dif. Puntos':'{:+d}'})
     return ret
+
+def format_group_classi(df, equipo):
+    return df.style.apply_index(color_clasi).applymap(color, subset=['Equipo'], equipo_seleccionado = equipo).format({'Dif. Puntos':'{:+d}'})
+    
+
+
+def get_group_sum_up(group_classi_df, team):
+    
+    tamaño_grupo = group_classi_df.shape[0]
+    
