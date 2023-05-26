@@ -4,6 +4,8 @@ import streamlit as st
 from utils import *
 import copy
 
+
+
 def color(val):
     color = 'orange' if val==equipo else 'white'
     return f'color: {color}'
@@ -32,7 +34,7 @@ df_horario = load_data()
 equipos = pd.unique(df_horario[['Equipo 1', 'Equipo 2']].dropna().values.ravel('K')).tolist()
 equipos.sort()
 equipos.insert(0, "Todos los equipos")
-equipos.insert(0, "")
+# equipos.insert(0, "")
 
 pistas = df_horario.Pista.dropna().unique().tolist()
 pistas.insert(0, "Todas las pistas")
@@ -51,17 +53,15 @@ competicion = st.selectbox('Competición', competiciones, key = "competicion")
      
 # equipos = pd.unique(df_horario[['Equipo 1', 'Equipo 2']].values.ravel('K')).tolist()   
 # equipos.insert(0, "Todos los equipos")
-equipo = st.selectbox('Buscar tu equipo, o selecciona "Todos los equipos" para ver el horario completo', equipos)
+# equipo = st.selectbox('Buscar tu equipo, o selecciona "Todos los equipos" para ver el horario completo', equipos)
+equipo = st.selectbox('Buscar tu equipo', equipos)
 
 if (equipo == "Todos los equipos") & (competicion != "Todas las competiciones"):
     df_horario = df_horario[(df_horario["Competición"] == competicion)]
 
 st.markdown("---")
 
-if (equipo == equipos[0]):
-    pass
-
-elif equipo == equipos[1]:
+if equipo == equipos[0]:
     # Si elegimos todo, mostramos todo!
     
     # Primero mostramos los partidos de grupos:
