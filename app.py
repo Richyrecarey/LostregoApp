@@ -14,7 +14,7 @@ def color(val):
 
 
 # :zap: II Torneo Lóstrego :zap:
-En esta app (v.1.0.0) podrás consultar los horarios y resultados del torneo en tiempo real.
+En esta app (v.1.0.1) podrás consultar los horarios y resultados del torneo en tiempo real.
 
 Si te gusta el evento, no olvides seguirnos en [Instagram](https://www.instagram.com/lostregoclubdevolei/), y escribirnos una reseña en [Google](https://g.page/r/Cc8en1zkeIWgEB0/review)! :wink: 
 
